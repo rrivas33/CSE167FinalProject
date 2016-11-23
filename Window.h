@@ -9,14 +9,15 @@
 #else
 #include <GL/glew.h>
 #endif
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
+#include "SOIL.h"
 #include "Cube.h"
 #include "shader.h"
 
 class Window
 {
 public:
-	static int width;
+	static int width; 
 	static int height;
 	static glm::mat4 P; // P for projection
 	static glm::mat4 V; // V for view

@@ -5,8 +5,8 @@ Cube * cube;
 GLint shaderProgram;
 
 // On some systems you need to change this to the absolute path
-#define VERTEX_SHADER_PATH "../shader.vert"
-#define FRAGMENT_SHADER_PATH "../shader.frag"
+#define VERTEX_SHADER_PATH "/Users/CR7/Desktop/UCSD/FALL16/CSE167/CSE167FinalProject/CSE167FinalProject/shader.vert"
+#define FRAGMENT_SHADER_PATH "/Users/CR7/Desktop/UCSD/FALL16/CSE167/CSE167FinalProject/CSE167FinalProject/shader.frag"
 
 // Default camera parameters
 glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
@@ -98,9 +98,9 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	// Call the update function the cube
-	cube->update();
+	//cube->update();
 }
-
+ 
 void Window::display_callback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
@@ -109,8 +109,11 @@ void Window::display_callback(GLFWwindow* window)
 	// Use the shader of programID
 	glUseProgram(shaderProgram);
 	
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelview"), 1, GL_FALSE, &Window::V[0][0]);
+    
 	// Render the cube
-	cube->draw(shaderProgram);
+	cube->Draw(shaderProgram);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
