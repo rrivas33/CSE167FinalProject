@@ -3,6 +3,12 @@
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
 GLint shaderProgram;
+bool pressedLeft = false;
+bool releasedLeft = false;
+bool pressedRight = false;
+bool releasedRight = false;
+double LastX = 0.0;
+double LastY = 0.0;
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "/Users/CR7/Desktop/UCSD/FALL16/CSE167/CSE167FinalProject/CSE167FinalProject/shader.vert"
@@ -134,3 +140,60 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 	}
 }
+
+void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    double xpos, ypos;
+    if (button == GLFW_MOUSE_BUTTON_LEFT){
+        if(action == GLFW_PRESS){
+            glfwGetCursorPos(window, &xpos, &ypos);
+            LastX = xpos;
+            LastY = ypos;
+            pressedLeft = true;
+            releasedLeft = false;
+        }//end if
+        if(action == GLFW_RELEASE){
+            releasedLeft = true;
+            pressedLeft =false;
+        }//end if
+    }//end if
+    if (button == GLFW_MOUSE_BUTTON_RIGHT){
+        if(action == GLFW_PRESS){
+            //Do something
+            pressedRight = true;
+            releasedRight = false;
+        }//end if
+        if(action == GLFW_RELEASE){
+            releasedRight = true;
+            pressedRight =false;
+            LastX = xpos;
+            LastY = ypos;
+        }//end if
+    }//end if
+}
+
+void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if(pressedLeft & !releasedLeft){
+        float angle;
+        // Perform horizontal (y-axis) rotation
+        angle = (float) (LastX - xpos) / 100.0f;
+        cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_pos, 1.0f));
+        cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_up, 1.0f));
+        //Now rotate vertically based on current orientation
+        angle = (float) (ypos - LastY) / 100.0f;
+        glm::vec3 axis = glm::cross((cam_pos - cam_look_at), cam_up);
+        cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_pos, 1.0f));
+        cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_up, 1.0f));
+        // Now update the camera
+        V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+        LastX = xpos;
+        LastY = ypos;
+        
+        // }//end if
+    }//end if
+    if(pressedRight & !releasedRight){
+        //Do something while Right Is pressed
+    }//end if
+}
+
