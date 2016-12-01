@@ -36,7 +36,7 @@ public:
     // Setup cube VAO
     GLuint skyboxVAO, skyboxVBO;
     GLuint cubemapTexture;
-};
+}; 
 
 const GLfloat skyboxVertices[] = {
     // Positions

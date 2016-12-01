@@ -54,7 +54,7 @@ void setup_opengl_settings()
     glDisable(GL_CULL_FACE);
     // Set clear color
     //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 void print_versions()

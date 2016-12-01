@@ -2,25 +2,33 @@
 
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
+BezierPatch* patch;
 GLint shaderProgram;
+GLint gridShaderProgram;
+GLint buildingShader;
 bool pressedLeft = false;
 bool releasedLeft = false;
 bool pressedRight = false;
 bool releasedRight = false;
 double LastX = 0.0;
 double LastY = 0.0;
+bool start = true;
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "/Users/CR7/Desktop/UCSD/FALL16/CSE167/CSE167FinalProject/CSE167FinalProject/shader.vert"
 #define FRAGMENT_SHADER_PATH "/Users/CR7/Desktop/UCSD/FALL16/CSE167/CSE167FinalProject/CSE167FinalProject/shader.frag"
-
+#define GRID_VERTEX_SHADER_PATH "/Users/CR7/Desktop/UCSD/FALL16/CSE167/CSE167FinalProject/CSE167FinalProject/gridShader.vert"
+#define GRID_FRAGMENT_SHADER_PATH "/Users/CR7/Desktop/UCSD/FALL16/CSE167/CSE167FinalProject/CSE167FinalProject/gridShader.frag"
+#define BUILDING_VERTEX_SHADER_PATH "/Users/CR7/Desktop/UCSD/FALL16/CSE167/CSE167FinalProject/CSE167FinalProject/buildingShader.vert"
+#define BUILDING_FRAGMENT_SHADER_PATH "/Users/CR7/Desktop/UCSD/FALL16/CSE167/CSE167FinalProject/CSE167FinalProject/buildingShader.frag"
 // Default camera parameters
-glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
+glm::vec3 cam_pos(0.0f, 10.0f, 20.0f);		// e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 
 int Window::width;
 int Window::height;
+std::vector<Building*> buildings;
 
 glm::mat4 Window::P;
 glm::mat4 Window::V;
@@ -28,16 +36,24 @@ glm::mat4 Window::V;
 void Window::initialize_objects()
 {
 	cube = new Cube();
-
+    patch = new BezierPatch();
+    
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-}
+    gridShaderProgram = LoadShaders(GRID_VERTEX_SHADER_PATH, GRID_FRAGMENT_SHADER_PATH);
+    buildingShader = LoadShaders(BUILDING_VERTEX_SHADER_PATH, BUILDING_FRAGMENT_SHADER_PATH);
+} 
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
 	delete(cube);
+    delete(patch);
+    for(auto it= buildings.begin(); it!=buildings.end(); ++it)
+        delete *it;
 	glDeleteProgram(shaderProgram);
+    glDeleteProgram(gridShaderProgram);
+    glDeleteProgram(buildingShader);
 }
 
 GLFWwindow* Window::create_window(int width, int height)
@@ -120,6 +136,40 @@ void Window::display_callback(GLFWwindow* window)
     
 	// Render the cube
 	cube->Draw(shaderProgram);
+    
+    // Use the shader of programID
+    glUseProgram(gridShaderProgram);
+    
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &Window::P[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelview"), 1, GL_FALSE, &Window::V[0][0]);
+    
+    patch->Draw(gridShaderProgram);
+    
+    glUseProgram(buildingShader);
+    
+    
+    if(start){
+        srand (time(NULL));
+        for(int i = 0; i < patch->curveVertices.size(); i++)
+        {
+            int length = rand() % 1 + 1;
+            int width = rand() % 1 + 1;
+            int height = rand() % 10 + 1;
+            
+            int x = rand() % 20 + 1;
+            int y = 0;
+            int z = rand() % 20 + 1;
+            
+            buildings.push_back(new Building(length, height, width, patch->curveVertices[i+1]));
+        }
+        start = false;
+    }//end start
+    
+    glUniformMatrix4fv(glGetUniformLocation(buildingShader, "projection"), 1, GL_FALSE, &Window::P[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(buildingShader, "modelview"), 1, GL_FALSE, &Window::V[0][0]);
+    
+    for(auto building = buildings.begin(); building != buildings.end(); ++building)
+        (*building)->draw(buildingShader);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -138,6 +188,16 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+        else if(key == GLFW_KEY_S){
+            if(mods == 1){
+                cam_pos = cam_pos * 1.3f;
+                V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+            }//end if
+            else{
+                cam_pos = cam_pos * .75f;
+                V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+            }
+        }//end else if
 	}
 }
 

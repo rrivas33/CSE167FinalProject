@@ -12,7 +12,9 @@
 #include "GLFW/glfw3.h"
 #include "SOIL.h"
 #include "Cube.h"
+#include "BezierPatch.hpp"
 #include "shader.h"
+#include "Building.h"
 
 class Window
 {
@@ -31,5 +33,5 @@ public:
     static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
     static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 };
-
+ 
 #endif
